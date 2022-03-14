@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+// const ValidationError = require('../utils/errors');
 
 // возвращает все карточки
 module.exports.getCards = (req, res) => {
