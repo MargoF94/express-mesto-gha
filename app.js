@@ -7,15 +7,17 @@ const routerCards = require('./routes/cards');
 
 const app = express();
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
 // подклюение к серверу MongoDB
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+
 app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 

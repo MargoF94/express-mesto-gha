@@ -1,8 +1,8 @@
 const User = require('../models/user');
+
 // возвращает всех пользователей
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .populate(['owner', 'likes'])
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -15,7 +15,7 @@ module.exports.getUsers = (req, res) => {
 
 // возвращает пользователя по _id
 module.exports.getUserdById = (req, res) => {
-  User.findById(req.params._id)
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
@@ -49,7 +49,8 @@ module.exports.createUser = (req, res) => {
       _id: user._id,
     }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      console.dir(err);
+      if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       } else {
         res.status(500).send({ message: err.message });
