@@ -8,6 +8,7 @@ module.exports.getCards = (req, res) => {
     .then((cards) => {
       if (!cards) {
         res.status(400).send({ message: 'Не удалось найти карочки.' });
+        return;
       }
       res.send({ cards });
     })
@@ -27,13 +28,18 @@ module.exports.createCard = (req, res) => {
     owner,
     likes,
   })
-    .then((card) => res.send({
-      name: card.name,
-      link: card.link,
-      owner: card.owner,
-      likes: card.likes,
-      createdAt: card.createdAt,
-    }))
+    .then((card) => {
+      if (!card) {
+        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
+      }
+      res.send({
+        name: card.name,
+        link: card.link,
+        owner: card.owner,
+        likes: card.likes,
+        createdAt: card.createdAt,
+      });
+    })
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
@@ -46,7 +52,7 @@ module.exports.likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(400).send({ message: 'Карточка не найдена.' });
+        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
       } else {
         res.send({
           name: card.name,
@@ -60,7 +66,7 @@ module.exports.likeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(404).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+        res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       } else {
         res.status(500).send({ message: err.message });
       }
@@ -96,10 +102,6 @@ module.exports.deleteCard = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
-      } else {
-        res.status(500).send({ message: err.message });
-      }
+      res.status(500).send({ message: err.message });
     });
 };
