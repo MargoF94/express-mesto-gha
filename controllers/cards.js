@@ -6,11 +6,7 @@ module.exports.getCards = (req, res) => {
   Card.find({})
     // .populate(['owner', 'likes'])
     .then((cards) => {
-      if (!cards) {
-        res.status(400).send({ message: 'Не удалось найти карочки.' });
-        return;
-      }
-      res.send({ cards });
+      res.send({ data: cards });
     })
     .catch(() => {
       res.status(500).send({ message: 'Не удалось найти карочки.' });
@@ -20,27 +16,22 @@ module.exports.getCards = (req, res) => {
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
-  const likes = [];
 
   Card.create({
     name,
     link,
     owner,
-    likes,
   })
     .then((card) => {
-      if (!card) {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
-      }
-      res.send({
-        name: card.name,
-        link: card.link,
-        owner: card.owner,
-        likes: card.likes,
-        createdAt: card.createdAt,
-      });
+      res.send({ data: card });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
+    });
 };
 
 // добавление лайка
@@ -54,18 +45,11 @@ module.exports.likeCard = (req, res) => {
       if (!card) {
         res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
       } else {
-        res.send({
-          name: card.name,
-          link: card.link,
-          owner: card.owner,
-          likes: card.likes,
-          createdAt: card.createdAt,
-          _id: card._id,
-        });
+        res.send({ data: card });
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       } else {
         res.status(500).send({ message: err.message });
@@ -102,6 +86,10 @@ module.exports.deleteCard = (req, res) => {
       }
     })
     .catch((err) => {
-      res.status(500).send({ message: err.message });
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
     });
 };

@@ -4,18 +4,14 @@ const User = require('../models/user');
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Невалидный _id.' });
-      } else {
-        res.status(500).send({ message: err.message });
-      }
+    .catch(() => {
+      res.status(500).send({ message: 'Неудалось найти юзеров.' });
     });
 };
 
 // возвращает пользователя по _id
 module.exports.getUserdById = (req, res) => {
-  User.findById(req.user._id)
+  User.findById(req.params.id)
     .then((user) => {
       if (!user) {
         res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
@@ -29,7 +25,7 @@ module.exports.getUserdById = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(400).send({ message: 'Невалидный _id.' });
       } else {
         res.status(500).send({ message: err.message });
@@ -49,7 +45,6 @@ module.exports.createUser = (req, res) => {
       _id: user._id,
     }))
     .catch((err) => {
-      console.dir(err);
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       } else {

@@ -1,4 +1,3 @@
-const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -16,11 +15,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use('/users', require('./routes/users'));
-app.use('/cards', require('./routes/cards'));
-
-app.use(express.static(path.join(__dirname, 'public')));
-
 app.use((req, res, next) => {
   req.user = {
     _id: '622da73df257b6c3374d1c76', // вставьте сюда _id созданного в предыдущем пункте пользователя
@@ -31,6 +25,9 @@ app.use((req, res, next) => {
 
 app.use('/', routerUsers);
 app.use('/', routerCards);
+app.use((req, res) => {
+  res.status(404).send({ message: 'Запрос на несуществующий роут.' });
+});
 
 app.listen(3000, () => {
   console.log("I'm working!");
