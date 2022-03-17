@@ -11,18 +11,18 @@ module.exports.getUsers = (req, res) => {
 
 // возвращает пользователя по _id
 module.exports.getUserdById = (req, res) => {
-  User.findById(req.params.id)
+  User.findById(req.params.userId)
     .then((user) => {
-      if (!user) {
-        res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
-      } else {
-        res.send({
-          name: user.name,
-          about: user.about,
-          avatar: user.avatar,
-          _id: user._id,
-        });
-      }
+      // if (!user) {
+      //   res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
+      // } else {
+      res.send({
+        name: user.name,
+        bout: user.about,
+        avatar: user.avatar,
+        _id: user._id,
+      });
+      // }
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -78,7 +78,7 @@ module.exports.updateUser = (req, res) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       } else {
         res.status(500).send({ message: err.message });
@@ -110,7 +110,7 @@ module.exports.updateAvatar = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
       } else {
         res.status(500).send({ message: err.message });
