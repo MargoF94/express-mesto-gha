@@ -4,7 +4,6 @@ const Card = require('../models/card');
 // возвращает все карточки
 module.exports.getCards = (req, res) => {
   Card.find({})
-    // .populate(['owner', 'likes'])
     .then((cards) => {
       res.send({ data: cards });
     })

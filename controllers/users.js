@@ -66,10 +66,6 @@ module.exports.updateUser = (req, res) => {
     },
   )
     .then((user) => {
-      // if (!user) {
-      //   res.status(404).send({ message: 'Пользователь с указанным _id не найден.' });
-      //   return;
-      // }
       res.send({
         name: user.name,
         about: user.about,
@@ -100,16 +96,12 @@ module.exports.updateAvatar = (req, res) => {
     },
   )
     .then((user) => {
-      // if (!user) {
-      //   res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
-      // } else {
       res.send({
         name: user.name,
         about: user.about,
         avatar: user.avatar,
         _id: user._id,
       });
-      // }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
