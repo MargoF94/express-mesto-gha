@@ -143,6 +143,10 @@ module.exports.updateAvatar = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    throw next(new UnauthorizedError('Пожалуйста, зарегестрируйтесь.'));
+  }
+
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(

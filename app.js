@@ -23,14 +23,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '622da73df257b6c3374d1c76',
-//   };
-
-//   next();
-// });
-
 app.post('/signin', login);
 app.post('/signup', createUser);
 
@@ -53,6 +45,7 @@ app.use((err, req, res, next) => {
         ? 'На сервере произошла ошибка'
         : message,
     });
+  next();
 });
 
 app.listen(3000, () => {
