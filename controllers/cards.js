@@ -1,7 +1,7 @@
 const Card = require('../models/card');
 const BadRequestError = require('../errors/BadRequestError'); // 400
-const UnauthorizedError = require('../errors/UnauthorizedError'); // 401
 const ForbiddenError = require('../errors/ForbiddenError'); // 403
+const NotFoundError = require('../errors/NotFoundError'); // 404
 
 // возвращает все карточки
 module.exports.getCards = (req, res, next) => {
@@ -27,6 +27,8 @@ module.exports.createCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -49,6 +51,8 @@ module.exports.likeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные для постановки лайка.'));
+      } else {
+        next(err);
       }
     }).catch(next);
 };
@@ -70,6 +74,8 @@ module.exports.dislikeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Переданы некорректные данные для снятии лайка.'));
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -77,19 +83,19 @@ module.exports.dislikeCard = (req, res, next) => {
 
 // удаление карточки
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  const { id } = req.params;
+  Card.findById(id)
     .then((card) => {
       if (!card) {
-        next(new ForbiddenError('Передан несуществующий _id карточки.'));
-      } else if (card.owner._id === req.user._id) {
-        res.send({ message: 'Карточка успешно удалена' });
+        next(new NotFoundError('Передан несуществующий _id карточки.'));
       } else {
-        next(new UnauthorizedError('Вы не можете удлить чужую карточку.'));
-      }
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные для постановки/снятии лайка.'));
+        if (card.owner._id === req.user._id) {
+          next(new ForbiddenError('Вы не можете удлить чужую карточку.'));
+        }
+        card.remove()
+          .then(() => {
+            res.send({ message: 'Карточка успешно удалена' });
+          });
       }
     })
     .catch(next);

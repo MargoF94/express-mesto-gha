@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const BadRequestError = require('../errors/BadRequestError'); // 400
 const UnauthorizedError = require('../errors/UnauthorizedError'); // 401
-const ForbiddenError = require('../errors/ForbiddenError'); // 403
 const NotFoundError = require('../errors/NotFoundError'); // 404
 const ConflictError = require('../errors/ConflictError'); // 409
 
@@ -21,7 +20,7 @@ module.exports.getUserdById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь по указанному _id не найден.');
+        next(new NotFoundError('Пользователь по указанному _id не найден.'));
       } else {
         res.send({
           name: user.name,
@@ -36,6 +35,8 @@ module.exports.getUserdById = (req, res, next) => {
         next(new BadRequestError('Невалидный _id.'));
       } else if (err.status === 404) {
         next(new NotFoundError('Пользователь по указанному _id не найден.'));
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -76,6 +77,8 @@ module.exports.createUser = (req, res, next) => {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
       } else if (err.code === 11000) {
         next(new ConflictError('Введенный email уже зарегестрирован.'));
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -94,18 +97,24 @@ module.exports.updateUser = (req, res, next) => {
     },
   )
     .then((user) => {
-      res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        _id: user._id,
-      });
+      if (!user) {
+        next(new NotFoundError('Пользователь по указанному _id не найден.'));
+      } else {
+        res.send({
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          _id: user._id,
+        });
+      }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении профиля.'));
       } else if (err.name === 'CastError') {
-        next(new ForbiddenError('Пользователь с указанным _id не найден.'));
+        next(new BadRequestError('Некорректный id.'));
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -123,18 +132,24 @@ module.exports.updateAvatar = (req, res, next) => {
     },
   )
     .then((user) => {
-      res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        _id: user._id,
-      });
+      if (!user) {
+        next(new NotFoundError('Пользователь по указанному _id не найден.'));
+      } else {
+        res.send({
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          _id: user._id,
+        });
+      }
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
       } else if (err.name === 'CastError') {
         next(new NotFoundError('Пользователь по указанному _id не найден.'));
+      } else {
+        next(err);
       }
     })
     .catch(next);
@@ -156,10 +171,10 @@ module.exports.login = (req, res, next) => {
       );
       res.cookie('jwt', token, {
         httpOnly: true,
-      });
+      }).send({ token });
     })
     .catch(() => {
-      throw next(new UnauthorizedError('Пожалуйста, зарегестрируйтесь.'));
+      next(new UnauthorizedError('Пожалуйста, зарегестрируйтесь.'));
     })
     .catch(next);
 };
