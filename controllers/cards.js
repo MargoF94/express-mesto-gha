@@ -83,14 +83,15 @@ module.exports.dislikeCard = (req, res, next) => {
 
 // удаление карточки
 module.exports.deleteCard = (req, res, next) => {
-  const { id } = req.params;
-  Card.findById(id)
+  const { cardId } = req.params;
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
         next(new NotFoundError('Передан несуществующий _id карточки.'));
       } else {
-        if (card.owner._id === req.user._id) {
+        if (!card.owner._id.equals(req.user._id)) {
           next(new ForbiddenError('Вы не можете удлить чужую карточку.'));
+          return;
         }
         card.remove()
           .then(() => {

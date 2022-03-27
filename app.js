@@ -1,11 +1,11 @@
 const express = require('express');
-const {
-  celebrate,
-  Joi,
-} = require('celebrate');
 const cookieParser = require('cookie-parser');
-const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const {
+  validateSignUp,
+  validateSignIn,
+} = require('./middlewares/validators');
 const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 const NotFoundError = require('./errors/NotFoundError'); // 404
@@ -28,40 +28,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email().min(4)
-      .messages({
-        'string.empty': 'Поле с email не должно быть пустым.',
-        'string.notEmail': 'Некорректный email',
-        'string.min': 'email слишком короткий',
-        'any.required': 'Введите email.',
-      }),
-    password: Joi.string().required().messages({
-      'any.required': 'Пароль не указан.',
-    }),
-  }),
-}), login);
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().uri().messages({
-      'string.notURL': 'Неправильный адрес.',
-      'any.required': 'Укажите ссылку на аватар.',
-    }),
-    email: Joi.string().required().email()
-      .messages({
-        'string.empty': 'Поле с email не должно быть пустым.',
-        'string.notEmail': 'Некорректный email',
-        'string.min': 'email слишком короткий',
-        'any.required': 'Введите email.',
-      }),
-    password: Joi.string().required().messages({
-      'any.required': 'Пароль не указан.',
-    }),
-  }),
-}), createUser);
+app.post('/signin', validateSignIn, login);
+app.post('/signup', validateSignUp, createUser);
 
 app.use(auth);
 
