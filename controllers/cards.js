@@ -43,7 +43,7 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        next(new ForbiddenError('Передан несуществующий _id карточки.'));
+        next(new NotFoundError('Передан несуществующий _id карточки.'));
       } else {
         res.send({ data: card });
       }
@@ -66,7 +66,7 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        next(new ForbiddenError('Карточка с данным _id не существует.'));
+        next(new NotFoundError('Карточка с данным _id не существует.'));
       } else {
         res.send({ data: card });
       }

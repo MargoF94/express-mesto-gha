@@ -38,7 +38,7 @@ module.exports.validateSignIn = celebrate({
 
 module.exports.validateCardId = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string(),
+    cardId: Joi.string().length(24).hex().required(),
   }),
 });
 
@@ -61,7 +61,7 @@ module.exports.validateCreateCard = celebrate({
 
 module.exports.validateGetUserById = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string(),
+    userId: Joi.string().length(24).hex().required(),
   }),
 });
 
@@ -87,7 +87,7 @@ module.exports.validateUpdateUser = celebrate({
 module.exports.validateUpdateAvatar = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().required().pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]+\.[-a-zA-Z0-9@:%._+~#=]+/)
-      .messeges({
+      .messages({
         'string.notURL': 'Неправильный адрес.',
         'any.required': 'Укажите ссылку на аватар.',
       }),
